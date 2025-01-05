@@ -10,13 +10,24 @@ export const PlayFieldContainer = styled.div`
     height: 85%;
     z-index: 0;
     color: var(--hights);
-    
-    .hint {
-        opacity: .15;
-        transition: .5s;
+
+    .active {
+        transition: stroke .5 ease fowards;
     }
     
-    &:hover > .hint {
-        opacity: 1;
+    .hint {
+        opacity: .0;
+        transition: .5s;
+    }
+
+    .winning {
+        stroke: red;
+        animation: strokeColorChange .5s ease-in;
+    }
+
+    @media (min-width: 500px) {
+        &:hover > .hint {
+            opacity: .15;
+        }
     }
 `

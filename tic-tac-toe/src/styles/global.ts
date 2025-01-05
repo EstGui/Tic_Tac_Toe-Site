@@ -36,4 +36,13 @@ export const GlobalStyle = createGlobalStyle`
         font-family: 'Poppins';
         color: white;
     }
+
+    @keyframes strokeColorChange {
+        0% {
+            stroke: #FFF;
+        }
+        100% {
+            stroke: #F00;
+        }
+    }
 `

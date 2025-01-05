@@ -8,7 +8,7 @@ export const HomeContainer = styled.div`
     grid-template-areas: "title"
                          "board"
                          "options";
-    gap: 20px;
+    gap: 30px;
     justify-items: center;
     align-items: center;
 `
@@ -16,7 +16,6 @@ export const HomeContainer = styled.div`
 export const ControlsContainer = styled.div`
     width: 360px;
     display: flex;
-    // flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 20px;

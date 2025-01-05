@@ -1,74 +1,117 @@
 import { useState, useEffect } from "react";
-import { BoardContainer, HorizontalLines, VerticalLines, Line, BoardFields } from "./styles"
+import { BoardContainer, HorizontalLines, VerticalLines, Line, BoardFields, Wrapper } from "./styles";
 import { PlayField } from "../PlayField";
 import { api } from "../../services/api";
+import { IBoard } from "./types";
 
-interface BoardProps {
-    starterPlayer: boolean;
-}
-
-const Board: React.FC<BoardProps>= ({ starterPlayer }) => {
-    const [board, setBoard] = useState(Array(9).fill(null))
+const Board: React.FC<IBoard> = ({ player }) => {
+    const [board, setBoard] = useState(Array(9).fill(null));
     const [currentPlayer, setCurrentPlayer] = useState(true);
+    const [winningFields, setWinningFields] = useState<number[] | null>(null);
+    const [hintText, setHintText] = useState(player ? "Your Turn" : "AI Turn")
 
     useEffect(() => {
-        if (currentPlayer !== starterPlayer) {
-            console.log("AI joga");
-            const requestBody = {
-                board: board
-            }
-            console.log(requestBody)
+        const controller = new AbortController();
+
+        const requestPlay = async () => {
             try {
-                const {} = api.post('/play', requestBody).then(response => console.log(response.data))
-                                            .catch(error => console.error(error));
-            } catch {
-                alert("Houve um erro. Tente novamente.");
+                const isTerminal = await api.post('/isTerminal', { board }, {signal: controller.signal});
+                const { victory, playFields } = isTerminal.data;
+
+                if (victory == 1 || victory == -1 || playFields === true) {
+                    if (playFields === true) {
+                        setHintText("Nobody Won");
+                    } else {
+                        setHintText(victory === 1 && player ? "You Won" : "AI Won")
+                        setWinningFields(playFields);
+                    }
+                    return;
+                } else {
+                    setHintText((currentPlayer === player) ? "Your Turn" : "AI Turn");
+                }
+            } catch (error: any) {
+                if (error.name === "CanceledError") {
+                    // pass console.log("Requisição cancelada");
+                }
+                else {
+                    console.log("Houve um erro. Tente novamente", error);
+                }
             }
-        } else {
-            console.log("Você joga");
-        }
+
+
+            if (currentPlayer === player) return;
+
+            try {
+                const response = await api.post(
+                    '/play',
+                    { board },
+                    { signal: controller.signal}
+                );
+
+                const { play } = response.data;
+
+                if (player !== currentPlayer) {
+                    const timeoutId = setTimeout(() => handlePlay(play), 500);
+
+                    return () => clearTimeout(timeoutId);
+                }
+            } catch (error: any) {
+                if (error.name === "CanceledError") {
+                    // pass console.log("Requisição cancelada");
+                }
+                else {
+                    console.log("Houve um erro. Tente novamente", error);
+                }
+            }
+        };
+
+        requestPlay();
+
+        return () => controller.abort();
     }, [currentPlayer]);
 
-    const handleClick = (index: number) => {
-        if (board[index]) return;
 
-        if (starterPlayer === currentPlayer) {
-            const newBoard = [...board];
-            
-            newBoard[index] = currentPlayer ? 'X' : 'O';
-            setBoard(newBoard);
-            
-            setCurrentPlayer(!currentPlayer);
-        } else {
-            window.alert('AI Turn')
-        }
-        console.log(board)
-
+    const handlePlay = (index: number) => {
+        const newBoard = [...board];
+        newBoard[index] = currentPlayer ? 'X' : 'O';
+        setBoard(newBoard);
+        setCurrentPlayer(!currentPlayer);
     };
 
-    return (
-        <BoardContainer>
-            <VerticalLines>
-                <Line></Line>
-                <Line></Line>
-            </VerticalLines>
-            <HorizontalLines>
-                <Line></Line>
-                <Line></Line>
-            </HorizontalLines>
+    const handleClick = (index: number) => {
+        if (board[index] || player !== currentPlayer || winningFields) return;
 
-            <BoardFields>
-                {board.map((value, index) => (
-                    <PlayField 
+        handlePlay(index);
+    };
+
+
+    return (
+        <Wrapper>
+            <span>{hintText}</span>
+            <BoardContainer>
+                <VerticalLines>
+                    <Line></Line>
+                    <Line></Line>
+                </VerticalLines>
+                <HorizontalLines>
+                    <Line></Line>
+                    <Line></Line>
+                </HorizontalLines>
+
+                <BoardFields>
+                    {board.map((value, index) => (
+                        <PlayField
                         key={index}
                         value={value}
+                        isWinningField={winningFields?.includes(index)}
                         currentPlayer={currentPlayer ? 'X' : 'O'}
                         onClick={() => handleClick(index)}
-                    />
-                ))}
-            </BoardFields>
-        </BoardContainer>
-    )
-}
+                        />
+                    ))}
+                </BoardFields>
+            </BoardContainer>
+        </Wrapper>
+    );
+};
 
 export { Board };

@@ -1,16 +1,22 @@
 import styled from "styled-components";
 
+export const Wrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+`
+
 export const BoardContainer = styled.div`
     position: relative;
-    width: 360px;
-    height: 360px;
-    // padding: 5%;
+    width: 340px;
+    height: 340px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
     grid-area: "board";
-    // background: red;
 `
 
 export const VerticalLines = styled.div`

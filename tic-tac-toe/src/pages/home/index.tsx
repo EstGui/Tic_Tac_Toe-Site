@@ -21,11 +21,12 @@ const Home = () => {
             <div id="title">
                 <h1>Tic-Tac-Toe AI</h1>
             </div>
-        
-            <Board key={boardKey} starterPlayer={player}/>
+
+
+            <Board key={boardKey} player={player}/>
             
             <ControlsContainer>
-                <Button text={`Play as ${player ? 'X' : 'O'}`} variant={player} onClick={handlePlayerChange}/>
+                <Button text={`${player ? 'Hard' : 'Easy'} Mode`} variant={player} onClick={handlePlayerChange}/>
                 <Button text="Restart" onClick={handleRestart}/>
             </ControlsContainer>
         </HomeContainer>

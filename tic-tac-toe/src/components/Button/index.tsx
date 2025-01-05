@@ -1,10 +1,5 @@
 import { ButtonPrimary } from "./styles";
-
-interface IButton {
-    text: string;
-    variant?: boolean;
-    onClick: () => void; 
-}
+import { IButton } from "./types";
 
 const Button: React.FC<IButton> = ({ text, onClick }) => {
     return (
