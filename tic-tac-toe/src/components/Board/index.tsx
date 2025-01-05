@@ -15,8 +15,13 @@ const Board: React.FC<IBoard> = ({ player }) => {
 
         const requestPlay = async () => {
             try {
-                const isTerminal = await api.post('/isTerminal', { board }, {signal: controller.signal});
-                const { victory, playFields } = isTerminal.data;
+                const response = await api.post(
+                    '/play',
+                    { board },
+                    { signal: controller.signal},
+                );
+
+                const { play, victory, playFields } = response.data;
 
                 if (victory == 1 || victory == -1 || playFields === true) {
                     if (playFields === true) {
@@ -29,35 +34,17 @@ const Board: React.FC<IBoard> = ({ player }) => {
                 } else {
                     setHintText((currentPlayer === player) ? "Your Turn" : "AI Turn");
                 }
-            } catch (error: any) {
-                if (error.name === "CanceledError") {
-                    // pass console.log("Requisição cancelada");
-                }
-                else {
-                    console.log("Houve um erro. Tente novamente", error);
-                }
-            }
-
-
-            if (currentPlayer === player) return;
-
-            try {
-                const response = await api.post(
-                    '/play',
-                    { board },
-                    { signal: controller.signal}
-                );
-
-                const { play } = response.data;
 
                 if (player !== currentPlayer) {
                     const timeoutId = setTimeout(() => handlePlay(play), 500);
 
                     return () => clearTimeout(timeoutId);
+                } else {
+                    return;
                 }
             } catch (error: any) {
                 if (error.name === "CanceledError") {
-                    // pass console.log("Requisição cancelada");
+                    // console.log("Requisição cancelada");
                 }
                 else {
                     console.log("Houve um erro. Tente novamente", error);
